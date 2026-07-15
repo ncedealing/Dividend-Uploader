@@ -1,0 +1,22 @@
+{
+  "name": "forbrokers-plugin-config-console",
+  "version": "1.1.1",
+  "private": true,
+  "description": "Standalone authenticated JSON configuration console for remote plugins",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node ../tests/e2e.js && node ../tests/reset-password.js && node ../tests/apply-upgrade.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

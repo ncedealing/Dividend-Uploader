@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Plugin Config Console</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #11171e;
+      --panel-2: #171e26;
+      --field: #0d131a;
+      --border: #2a3540;
+      --text: #edf2f7;
+      --muted: #8d9aa8;
+      --blue: #4d8dff;
+      --teal: #21c7b7;
+      --green: #35c46a;
+      --red: #ff5c72;
+      --amber: #efb94f;
+      --radius: 6px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    button, input, textarea { font: inherit; }
+    button { letter-spacing: 0; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .hidden { display: none !important; }
+
+    .language-switch {
+      display: inline-flex;
+      padding: 2px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--field);
+    }
+    .language-switch button {
+      min-width: 48px;
+      height: 30px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 4px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+    .language-switch button.active { color: var(--text); background: var(--panel-2); }
+
+    .login-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 22px;
+    }
+    .login-top { display: flex; justify-content: flex-end; }
+    .login-center { display: grid; place-items: center; }
+    .login-box { width: min(420px, 100%); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #3a78df;
+      border-radius: var(--radius);
+      color: #fff;
+      background: #225fbf;
+      font-family: var(--mono);
+      font-weight: 800;
+    }
+    .brand-name { font-weight: 750; font-size: 17px; }
+    .brand-sub { color: var(--muted); font-size: 12px; }
+    .login-heading { margin: 42px 0 24px; font-size: 28px; line-height: 1.2; letter-spacing: 0; }
+    .field-label {
+      display: block;
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .input, .textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: var(--field);
+      outline: none;
+    }
+    .input { height: 44px; padding: 0 13px; }
+    .textarea { padding: 13px; resize: vertical; font-family: var(--mono); line-height: 1.55; }
+    .input:focus, .textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77,141,255,.14); }
+    .form-row { margin-bottom: 16px; }
+    .error-line { min-height: 22px; margin-top: 10px; color: var(--red); font-size: 12px; }
+    .login-footer, .app-footer {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+    .login-footer span, .app-footer span { margin: 0 7px; }
+
+    .btn {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: var(--panel-2);
+      font-weight: 680;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: #445363; background: #1b2530; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { border-color: #2f70df; background: #2f70df; color: #fff; }
+    .btn-primary:hover { border-color: #4382eb; background: #4382eb; }
+    .btn-danger { border-color: rgba(255,92,114,.45); color: var(--red); background: rgba(255,92,114,.08); }
+    .btn-compact { min-height: 32px; padding: 0 10px; font-size: 12px; }
+    .btn-wide { width: 100%; min-height: 44px; }
+
+    .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+    .app-header {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border);
+      background: #0d1218;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-spacer { flex: 1; }
+    .version-chip { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+    .header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    .workspace {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+      padding: 28px 24px 22px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 28px;
+      flex: 1;
+    }
+    .page-heading { margin: 0; font-size: 23px; letter-spacing: 0; }
+    .page-sub { margin: 5px 0 0; color: var(--muted); }
+    .section-head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
+    .section-actions { display: flex; gap: 8px; margin-left: auto; }
+    .editor-section {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+    .name-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 14px; }
+    .file-state { min-width: 110px; padding-bottom: 12px; color: var(--muted); font-family: var(--mono); font-size: 12px; text-align: right; }
+    .file-state.active { color: var(--green); }
+    .config-data-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+    .config-data-head .field-label { margin: 0; }
+    .editor-mode {
+      display: inline-flex;
+      margin-left: auto;
+      padding: 2px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--field);
+    }
+    .editor-mode button {
+      min-height: 28px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 4px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .editor-mode button.active { color: var(--text); background: var(--panel-2); }
+    .parameter-editor { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .parameter-head, .parameter-row {
+      display: grid;
+      grid-template-columns: minmax(160px, 1.4fr) minmax(110px, .8fr) minmax(100px, .7fr) 44px;
+      gap: 12px;
+      align-items: center;
+    }
+    .parameter-head {
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      background: #0d131a;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .parameter-row { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .parameter-row:last-child { border-bottom: 0; }
+    .parameter-input {
+      width: 100%;
+      min-width: 0;
+      height: 40px;
+      padding: 0 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: var(--field);
+      outline: none;
+    }
+    .parameter-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77,141,255,.12); }
+    .parameter-delete {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border: 1px solid rgba(255,92,114,.38);
+      border-radius: var(--radius);
+      color: var(--red);
+      background: rgba(255,92,114,.07);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .parameter-add { padding: 10px 12px; border-top: 1px solid var(--border); background: #0d131a; }
+    .data-editor { min-height: 220px; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0 20px; }
+    .preview-label { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .uuid-note { color: var(--muted); font-size: 11px; font-family: var(--mono); }
+    .json-preview {
+      min-height: 250px;
+      max-height: 430px;
+      overflow: auto;
+      margin: 0;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--teal);
+      background: #080d13;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .plugin-status {
+      display: grid;
+      grid-template-columns: 12px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .status-dot { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--muted); }
+    .status-dot.green { background: var(--green); box-shadow: 0 0 0 3px rgba(53,196,106,.12); }
+    .status-dot.red { background: var(--red); box-shadow: 0 0 0 3px rgba(255,92,114,.12); }
+    .status-title { font-weight: 750; }
+    .status-detail { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+    .integration { margin-top: 12px; border-bottom: 1px solid var(--border); }
+    .integration summary {
+      display: flex;
+      align-items: center;
+      min-height: 42px;
+      color: var(--muted);
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+    }
+    .integration summary::-webkit-details-marker { display: none; }
+    .integration summary::after { content: "+"; margin-left: auto; font-family: var(--mono); font-size: 18px; }
+    .integration[open] summary::after { content: "-"; }
+    .integration-body { padding: 4px 0 14px; }
+    .integration-row {
+      display: grid;
+      grid-template-columns: 145px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 42px;
+      border-top: 1px solid rgba(42,53,64,.65);
+    }
+    .integration-key { color: var(--muted); font-size: 11px; font-family: var(--mono); text-transform: uppercase; }
+    .integration-value { color: var(--blue); font-family: var(--mono); font-size: 11px; overflow-wrap: anywhere; }
+
+    .sidebar { min-width: 0; }
+    .side-section { padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .side-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .side-title { margin: 0; font-size: 15px; }
+    .count { margin-left: auto; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+    .list { display: flex; flex-direction: column; gap: 7px; }
+    .empty { padding: 18px 0; color: var(--muted); font-size: 12px; }
+    .file-item, .feedback-item {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: var(--panel);
+      text-align: left;
+    }
+    button.file-item { cursor: pointer; }
+    button.file-item:hover, button.file-item.selected { border-color: #45607a; background: var(--panel-2); }
+    .item-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .item-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+    .active-badge { margin-left: auto; color: var(--green); font-size: 10px; font-family: var(--mono); text-transform: uppercase; }
+    .item-meta { margin-top: 5px; color: var(--muted); font-family: var(--mono); font-size: 10px; overflow-wrap: anywhere; }
+    .feedback-status { font-family: var(--mono); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .feedback-status.ok { color: var(--green); }
+    .feedback-status.error { color: var(--red); }
+    .feedback-version { margin-left: auto; color: var(--amber); font-family: var(--mono); font-size: 10px; }
+
+    .app-footer { padding: 10px 20px 22px; }
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      max-width: min(390px, calc(100vw - 40px));
+      padding: 11px 14px;
+      border: 1px solid #40505e;
+      border-radius: var(--radius);
+      color: var(--text);
+      background: #18212a;
+      box-shadow: 0 12px 34px rgba(0,0,0,.35);
+      z-index: 50;
+    }
+    .toast.error { border-color: rgba(255,92,114,.6); color: #ffdce1; }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0,0,0,.72);
+      z-index: 40;
+    }
+    .modal { width: min(440px, 100%); padding: 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+    .modal h2 { margin: 0 0 18px; font-size: 19px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .version-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 46px;
+      margin-bottom: 18px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--field);
+    }
+    .version-value { color: var(--teal); font-family: var(--mono); font-weight: 750; }
+    .file-input { height: auto; min-height: 44px; padding: 9px 11px; color: var(--muted); }
+    .file-input::file-selector-button {
+      min-height: 28px;
+      margin-right: 10px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      background: var(--panel-2);
+      cursor: pointer;
+    }
+    .update-status { min-height: 42px; padding: 10px 12px; border-left: 3px solid var(--border); color: var(--muted); background: var(--field); font-size: 12px; }
+    .update-status.success { border-left-color: var(--green); color: var(--text); }
+    .update-status.failed { border-left-color: var(--red); color: #ffdce1; }
+
+    @media (max-width: 980px) {
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .side-section { min-width: 0; }
+    }
+    @media (max-width: 680px) {
+      .app-header { padding: 10px 14px; flex-wrap: wrap; }
+      .app-header .brand-sub, .version-chip { display: none; }
+      .workspace { padding: 20px 14px; }
+      .editor-section { padding: 16px; }
+      .section-head { align-items: stretch; flex-direction: column; }
+      .section-actions { margin-left: 0; }
+      .name-row { grid-template-columns: 1fr; }
+      .file-state { min-width: 0; padding: 0; text-align: left; }
+      .sidebar { grid-template-columns: 1fr; gap: 0; }
+      .integration-row { grid-template-columns: 1fr auto; padding: 9px 0; }
+      .integration-key { grid-column: 1 / -1; }
+      .header-actions .btn { padding: 0 9px; }
+      .config-data-head { align-items: flex-start; flex-direction: column; }
+      .editor-mode { margin-left: 0; }
+      .parameter-head { display: none; }
+      .parameter-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px; gap: 8px; }
+      .parameter-row .parameter-group { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-shell" id="login-view">
+    <div class="login-top">
+      <div class="language-switch" aria-label="Language">
+        <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <button type="button" data-lang="zh" onclick="setLanguage('zh')">中文</button>
+      </div>
+    </div>
+    <div class="login-center">
+      <form class="login-box" id="login-form">
+        <div class="brand">
+          <div class="brand-mark">FB</div>
+          <div>
+            <div class="brand-name">Plugin Config Console</div>
+            <div class="brand-sub" data-i18n="secureConsole">Secure configuration management</div>
+          </div>
+        </div>
+        <h1 class="login-heading" data-i18n="signIn">Sign in</h1>
+        <div class="form-row">
+          <label class="field-label" for="login-username" data-i18n="username">Username</label>
+          <input class="input" id="login-username" autocomplete="username" required>
+        </div>
+        <div class="form-row">
+          <label class="field-label" for="login-password" data-i18n="password">Password</label>
+          <input class="input" id="login-password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary btn-wide" id="login-button" type="submit" data-i18n="signInButton">Sign In</button>
+        <div class="error-line" id="login-error" role="alert"></div>
+      </form>
+    </div>
+    <footer class="login-footer">
+      <a href="mailto:support@forbrokers.com">support@forbrokers.com</a>
+      <span>·</span>
+      <span data-i18n="developedBy">Developed by</span>
+      <a href="https://forbrokers.com" target="_blank" rel="noopener">forbrokers.com</a>
+    </footer>
+  </section>
+
+  <section class="app-shell hidden" id="app-view">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">FB</div>
+        <div>
+          <div class="brand-name">Plugin Config Console</div>
+          <div class="brand-sub" data-i18n="secureConsole">Secure configuration management</div>
+        </div>
+      </div>
+      <div class="header-spacer"></div>
+      <span class="version-chip" id="version-label">v-</span>
+      <div class="language-switch" aria-label="Language">
+        <button type="button" data-lang="en" onclick="setLanguage('en')">EN</button>
+        <button type="button" data-lang="zh" onclick="setLanguage('zh')">中文</button>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-compact" type="button" onclick="openUpdateModal()" data-i18n="softwareUpdate">Software Update</button>
+        <button class="btn btn-compact" type="button" onclick="openPasswordModal()" data-i18n="changePassword">Change Password</button>
+        <button class="btn btn-compact" type="button" onclick="logout()" data-i18n="signOut">Sign Out</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="editor-section">
+        <div class="section-head">
+          <div>
+            <h1 class="page-heading" data-i18n="pageTitle">Plugin Configuration</h1>
+            <p class="page-sub" data-i18n="pageSub">Create and publish versioned JSON configuration files.</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn btn-compact" type="button" onclick="newConfig()" data-i18n="newFile">New</button>
+            <button class="btn btn-compact" type="button" onclick="refreshAll(true)" data-i18n="reload">Reload</button>
+          </div>
+        </div>
+
+        <div class="name-row form-row">
+          <div>
+            <label class="field-label" for="config-name" data-i18n="configName">Configuration Name</label>
+            <input class="input" id="config-name" maxlength="80" data-i18n-placeholder="configNamePlaceholder" placeholder="plugin_config">
+          </div>
+          <div class="file-state" id="file-state" data-i18n="newUnsaved">New file</div>
+        </div>
+
+        <div class="form-row">
+          <div class="config-data-head">
+            <label class="field-label" data-i18n="parameterConfig">Parameter Configuration</label>
+            <div class="editor-mode" aria-label="Editor mode">
+              <button type="button" id="rows-mode-button" onclick="switchEditorMode('rows')" data-i18n="rowsMode">Parameter Rows</button>
+              <button type="button" id="json-mode-button" onclick="switchEditorMode('json')" data-i18n="jsonMode">Raw JSON</button>
+            </div>
+          </div>
+          <div id="parameter-editor">
+            <div class="parameter-editor">
+              <div class="parameter-head">
+                <span data-i18n="groupName">Group Name</span>
+                <span data-i18n="lpAccount">LP Account</span>
+                <span data-i18n="tpValue">TP Value</span>
+                <span data-i18n="action">Action</span>
+              </div>
+              <div id="parameter-rows"></div>
+              <div class="parameter-add">
+                <button class="btn btn-compact" type="button" onclick="addParameterRow()" data-i18n="addParameterRow">+ Add Parameter Group</button>
+              </div>
+            </div>
+          </div>
+          <div class="hidden" id="raw-json-editor">
+            <label class="field-label" for="config-data" data-i18n="configData">Configuration Data (JSON)</label>
+            <textarea class="textarea data-editor" id="config-data" spellcheck="false">[]</textarea>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn btn-primary" type="button" id="save-button" onclick="saveConfig()" data-i18n="saveConfig">Save Config File</button>
+          <button class="btn" type="button" id="activate-button" onclick="activateConfig()" disabled data-i18n="setActive">Set Active</button>
+          <button class="btn btn-danger" type="button" id="delete-button" onclick="deleteConfig()" disabled data-i18n="deleteFile">Delete File</button>
+        </div>
+
+        <div class="preview-label">
+          <label class="field-label" data-i18n="jsonPreview">JSON Preview</label>
+          <span class="uuid-note" id="uuid-note" data-i18n="uuidOnSave">A new UUID is generated on save</span>
+        </div>
+        <pre class="json-preview" id="json-preview"></pre>
+
+        <div class="plugin-status" id="plugin-status" title="Waiting for plugin load">
+          <span class="status-dot" id="status-dot"></span>
+          <div>
+            <div class="status-title" id="status-title">Waiting for plugin load</div>
+            <div class="status-detail" id="status-detail">No active configuration.</div>
+          </div>
+        </div>
+
+        <details class="integration">
+          <summary data-i18n="integrationDetails">Integration Details</summary>
+          <div class="integration-body">
+            <div class="integration-row">
+              <span class="integration-key" data-i18n="currentFileUrl">Current File URL</span>
+              <span class="integration-value" id="current-file-url">-</span>
+              <button class="btn btn-compact" type="button" onclick="copyValue('current-file-url')" data-i18n="copy">Copy</button>
+            </div>
+            <div class="integration-row">
+              <span class="integration-key" data-i18n="activeConfigUrl">Active Config URL</span>
+              <span class="integration-value" id="active-url">-</span>
+              <button class="btn btn-compact" type="button" onclick="copyValue('active-url')" data-i18n="copy">Copy</button>
+            </div>
+            <div class="integration-row">
+              <span class="integration-key" data-i18n="uuidCheckUrl">UUID Check URL</span>
+              <span class="integration-value" id="meta-url">-</span>
+              <button class="btn btn-compact" type="button" onclick="copyValue('meta-url')" data-i18n="copy">Copy</button>
+            </div>
+            <div class="integration-row">
+              <span class="integration-key" data-i18n="feedbackUrl">Plugin Feedback URL</span>
+              <span class="integration-value" id="feedback-url">-</span>
+              <button class="btn btn-compact" type="button" onclick="copyValue('feedback-url')" data-i18n="copy">Copy</button>
+            </div>
+            <div class="integration-row">
+              <span class="integration-key" data-i18n="activeUuid">Active UUID</span>
+              <span class="integration-value" id="active-uuid">-</span>
+              <button class="btn btn-compact" type="button" onclick="copyValue('active-uuid')" data-i18n="copy">Copy</button>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <aside class="sidebar">
+        <section class="side-section">
+          <div class="side-title-row">
+            <h2 class="side-title" data-i18n="configFiles">Config Files</h2>
+            <span class="count" id="config-count">0</span>
+          </div>
+          <div class="list" id="config-list"></div>
+        </section>
+
+        <section class="side-section">
+          <div class="side-title-row">
+            <h2 class="side-title" data-i18n="pluginFeedback">Plugin Feedback</h2>
+            <span class="count" id="feedback-count">0</span>
+          </div>
+          <div class="list" id="feedback-list"></div>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="app-footer">
+      <a href="mailto:support@forbrokers.com">support@forbrokers.com</a>
+      <span>·</span>
+      <span data-i18n="developedBy">Developed by</span>
+      <a href="https://forbrokers.com" target="_blank" rel="noopener">forbrokers.com</a>
+    </footer>
+  </section>
+
+  <div class="modal-backdrop hidden" id="password-modal">
+    <form class="modal" id="password-form">
+      <h2 data-i18n="changePassword">Change Password</h2>
+      <div class="form-row">
+        <label class="field-label" for="current-password" data-i18n="currentPassword">Current Password</label>
+        <input class="input" id="current-password" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="form-row">
+        <label class="field-label" for="new-password" data-i18n="newPassword">New Password</label>
+        <input class="input" id="new-password" type="password" minlength="12" autocomplete="new-password" required>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="closePasswordModal()" data-i18n="cancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" data-i18n="updatePassword">Update Password</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="modal-backdrop hidden" id="update-modal">
+    <form class="modal" id="update-form">
+      <h2 data-i18n="softwareUpdate">Software Update</h2>
+      <div class="version-panel">
+        <span class="field-label" data-i18n="currentVersion">Current Version</span>
+        <span class="version-value" id="current-version">v-</span>
+      </div>
+      <div class="form-row">
+        <label class="field-label" for="update-file" data-i18n="updatePackage">Update Package</label>
+        <input class="input file-input" id="update-file" type="file" accept=".zip,application/zip" required>
+      </div>
+      <div class="update-status" id="update-status" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="closeUpdateModal()" data-i18n="cancel">Cancel</button>
+        <button class="btn btn-primary" id="update-button" type="submit" data-i18n="uploadInstall">Upload &amp; Install</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"></div>
+
+  <script>
+    'use strict';
+
+    const API = '/admin-api';
+    const TEXT = {
+      en: {
+        secureConsole: 'Secure configuration management', signIn: 'Sign in',
+        username: 'Username', password: 'Password', signInButton: 'Sign In', developedBy: 'Developed by',
+        softwareUpdate: 'Software Update', changePassword: 'Change Password', signOut: 'Sign Out', pageTitle: 'Plugin Configuration',
+        pageSub: 'Create and publish versioned JSON configuration files.', newFile: 'New', reload: 'Reload',
+        configName: 'Configuration Name', configNamePlaceholder: 'plugin_config', newUnsaved: 'New file', savedFile: 'Saved file', activeFile: 'Active file',
+        parameterConfig: 'Parameter Configuration', rowsMode: 'Parameter Rows', jsonMode: 'Raw JSON',
+        groupName: 'Group Name', lpAccount: 'LP Account', tpValue: 'TP Value', action: 'Action',
+        addParameterRow: '+ Add Parameter Group', deleteParameterRow: 'Delete parameter group',
+        configData: 'Configuration Data (JSON)', saveConfig: 'Save Config File', setActive: 'Set Active', deleteFile: 'Delete File',
+        jsonPreview: 'JSON Preview', uuidOnSave: 'A new UUID is generated on save', integrationDetails: 'Integration Details',
+        currentFileUrl: 'Current File URL', activeConfigUrl: 'Active Config URL', uuidCheckUrl: 'UUID Check URL',
+        feedbackUrl: 'Plugin Feedback URL', activeUuid: 'Active UUID', copy: 'Copy', configFiles: 'Config Files',
+        pluginFeedback: 'Plugin Feedback', currentPassword: 'Current Password', newPassword: 'New Password',
+        cancel: 'Cancel', updatePassword: 'Update Password', noConfigs: 'No configuration files.', noFeedback: 'No plugin feedback.',
+        waiting: 'Waiting for plugin load', noActive: 'No active configuration', connected: 'Plugin connected',
+        stale: 'Connection stale', reportedError: 'Plugin reported an error', noActiveDetail: 'Save or activate a configuration.',
+        waitingDetail: 'The active UUID has not been loaded by a plugin.', saved: 'Configuration saved.', activated: 'Configuration activated.',
+        deleted: 'Configuration deleted.', copied: 'Copied.', passwordUpdated: 'Password updated.', invalidJson: 'Configuration data must be valid JSON.',
+        enterName: 'Enter a configuration name.', confirmDelete: 'Delete this configuration file?', confirmActivate: 'Set this file as the active configuration?',
+        requestFailed: 'Request failed.', sessionExpired: 'Your session has expired. Please sign in again.', loginFailed: 'Unable to sign in.',
+        loading: 'Loading...', generatedAfterSave: 'Generated after save', never: 'Never',
+        rowsRequireArray: 'Parameter Rows requires a JSON array. Keep Raw JSON mode for this configuration.',
+        currentVersion: 'Current Version', updatePackage: 'Update Package', uploadInstall: 'Upload & Install',
+        updateIdle: 'No update is pending.', updateQueued: 'Update queued. The service will restart automatically.', updateInstalling: 'Installing update. The service is restarting...',
+        updateSuccess: 'Update installed successfully.', updateFailed: 'Update failed. The previous version was restored.',
+        updateReconnect: 'Update submitted. Reconnecting to the service...', selectZip: 'Select a ZIP update package.',
+        confirmUpdate: 'Install this update package now?'
+      },
+      zh: {
+        secureConsole: '安全的插件配置管理', signIn: '登录',
+        username: '用户名', password: '密码', signInButton: '登录', developedBy: '开发者',
+        softwareUpdate: '软件更新', changePassword: '修改密码', signOut: '退出登录', pageTitle: '插件配置',
+        pageSub: '创建并发布带版本标识的 JSON 配置文件。', newFile: '新建', reload: '重新加载',
+        configName: '配置名称', configNamePlaceholder: 'plugin_config', newUnsaved: '新文件', savedFile: '已保存文件', activeFile: '活动文件',
+        parameterConfig: '参数配置', rowsMode: '参数行', jsonMode: '原始 JSON',
+        groupName: '组名称', lpAccount: 'LP 账号', tpValue: 'TP 数值', action: '操作',
+        addParameterRow: '+ 添加参数组', deleteParameterRow: '删除参数组',
+        configData: '配置数据（JSON）', saveConfig: '保存配置文件', setActive: '设为活动', deleteFile: '删除文件',
+        jsonPreview: 'JSON 预览', uuidOnSave: '每次保存都会生成新 UUID', integrationDetails: '接口信息',
+        currentFileUrl: '当前文件地址', activeConfigUrl: '活动配置地址', uuidCheckUrl: 'UUID 检查地址',
+        feedbackUrl: '插件回传地址', activeUuid: '活动 UUID', copy: '复制', configFiles: '配置文件',
+        pluginFeedback: '插件回传', currentPassword: '当前密码', newPassword: '新密码',
+        cancel: '取消', updatePassword: '更新密码', noConfigs: '暂无配置文件。', noFeedback: '暂无插件回传。',
+        waiting: '等待插件加载', noActive: '暂无活动配置', connected: '插件连接正常',
+        stale: '连接已超时', reportedError: '插件报告错误', noActiveDetail: '请保存或启用一个配置。',
+        waitingDetail: '插件尚未完整加载当前 UUID。', saved: '配置已保存。', activated: '配置已启用。',
+        deleted: '配置已删除。', copied: '已复制。', passwordUpdated: '密码已更新。', invalidJson: '配置数据必须是有效的 JSON。',
+        enterName: '请输入配置名称。', confirmDelete: '确认删除这个配置文件？', confirmActivate: '确认将此文件设为活动配置？',
+        requestFailed: '请求失败。', sessionExpired: '登录已过期，请重新登录。', loginFailed: '无法登录。',
+        loading: '加载中...', generatedAfterSave: '保存后生成', never: '从未',
+        rowsRequireArray: '参数行模式要求 JSON 数据为数组；此配置请继续使用原始 JSON 模式。',
+        currentVersion: '当前版本', updatePackage: '更新包', uploadInstall: '上传并安装',
+        updateIdle: '当前没有待处理的更新。', updateQueued: '更新已排队，服务将自动重启。', updateInstalling: '正在安装更新，服务正在重启……',
+        updateSuccess: '更新安装成功。', updateFailed: '更新失败，已恢复之前的版本。',
+        updateReconnect: '更新已提交，正在重新连接服务……', selectZip: '请选择 ZIP 更新包。',
+        confirmUpdate: '确认立即安装这个更新包？'
+      }
+    };
+
+    let language = localStorage.getItem('plugin_console_language') || 'en';
+    let token = sessionStorage.getItem('plugin_console_token') || '';
+    let configs = [];
+    let feedback = [];
+    let activeMeta = null;
+    let current = null;
+    let editorMode = 'rows';
+    let parameterRows = [{ Group: '', LP: '', TP: '' }];
+    let urls = { active: '', meta: '', feedback: '' };
+    let refreshTimer = null;
+    let currentVersion = 'unknown';
+    let upgradePollTimer = null;
+
+    const $ = id => document.getElementById(id);
+    const t = key => TEXT[language][key] || TEXT.en[key] || key;
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
+    }
+
+    function setLanguage(next) {
+      language = next === 'zh' ? 'zh' : 'en';
+      localStorage.setItem('plugin_console_language', language);
+      document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+      document.querySelectorAll('[data-lang]').forEach(button => button.classList.toggle('active', button.dataset.lang === language));
+      document.querySelectorAll('[data-i18n]').forEach(element => { element.textContent = t(element.dataset.i18n); });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.placeholder = t(element.dataset.i18nPlaceholder); });
+      renderFiles();
+      renderFeedback();
+      renderParameterEditor();
+      renderCurrent();
+      updatePluginStatus();
+    }
+
+    async function request(path, options = {}) {
+      const headers = { ...(options.headers || {}) };
+      if (typeof options.body === 'string' && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const response = await fetch(API + path, { ...options, headers });
+      let data = {};
+      try { data = await response.json(); } catch { data = {}; }
+      if (response.status === 401 && path !== '/login') {
+        showToast(t('sessionExpired'), true);
+        logout(false);
+        throw new Error(t('sessionExpired'));
+      }
+      if (!response.ok) throw new Error(data.error || t('requestFailed'));
+      return data;
+    }
+
+    function showToast(message, isError = false) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.classList.toggle('error', isError);
+      toast.classList.remove('hidden');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.add('hidden'), 3200);
+    }
+
+    function showLogin() {
+      $('app-view').classList.add('hidden');
+      $('login-view').classList.remove('hidden');
+      clearInterval(refreshTimer);
+      refreshTimer = null;
+    }
+
+    function showApp() {
+      $('login-view').classList.add('hidden');
+      $('app-view').classList.remove('hidden');
+      clearInterval(refreshTimer);
+      refreshTimer = setInterval(() => loadFeedback(false), 60000);
+    }
+
+    function logout(showMessage = false) {
+      token = '';
+      sessionStorage.removeItem('plugin_console_token');
+      current = null;
+      showLogin();
+      if (showMessage) showToast(t('sessionExpired'), true);
+    }
+
+    async function login(event) {
+      event.preventDefault();
+      const button = $('login-button');
+      const error = $('login-error');
+      button.disabled = true;
+      error.textContent = '';
+      try {
+        const data = await request('/login', {
+          method: 'POST',
+          body: JSON.stringify({ username: $('login-username').value.trim(), password: $('login-password').value })
+        });
+        token = data.token;
+        sessionStorage.setItem('plugin_console_token', token);
+        $('login-password').value = '';
+        showApp();
+        await refreshAll(true);
+      } catch (err) {
+        error.textContent = err.message || t('loginFailed');
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function restoreSession() {
+      setLanguage(language);
+      if (!token) return showLogin();
+      try {
+        await request('/me');
+        showApp();
+        await refreshAll(true);
+      } catch {
+        showLogin();
+      }
+    }
+
+    async function refreshAll(openActive = false) {
+      await Promise.all([loadVersion(), loadConfigs(openActive), loadFeedback(false)]);
+    }
+
+    async function loadVersion() {
+      try {
+        const data = await request('/version');
+        currentVersion = data.version;
+        $('version-label').textContent = `v${currentVersion}`;
+        $('current-version').textContent = `v${currentVersion}`;
+      } catch {}
+    }
+
+    async function loadConfigs(openActive = false) {
+      const data = await request('/configs');
+      configs = data.configs || [];
+      activeMeta = data.active_meta || null;
+      urls = { active: data.active_url || '', meta: data.active_meta_url || '', feedback: data.feedback_url || '' };
+      $('active-url').textContent = urls.active || '-';
+      $('meta-url').textContent = urls.meta || '-';
+      $('feedback-url').textContent = urls.feedback || '-';
+      $('active-uuid').textContent = activeMeta?.uuid || '-';
+      renderFiles();
+
+      const active = configs.find(row => row.enabled);
+      if (openActive && active) await openConfig(active.filename);
+      else if (current && !configs.some(row => row.filename === current.filename)) newConfig();
+      else updatePluginStatus();
+    }
+
+    async function openConfig(filename) {
+      try {
+        const data = await request('/configs/' + encodeURIComponent(filename));
+        current = { filename: data.filename, ...data.content };
+        $('config-name').value = data.filename.replace(/\.json$/i, '');
+        setEditorData(data.content.data);
+        renderCurrent();
+        renderFiles();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function newConfig() {
+      current = null;
+      $('config-name').value = '';
+      editorMode = 'rows';
+      parameterRows = [{ Group: '', LP: '', TP: '' }];
+      $('config-data').value = '[]';
+      renderParameterEditor();
+      renderCurrent();
+      renderFiles();
+      $('config-name').focus();
+    }
+
+    function emptyParameterRow() {
+      return { Group: '', LP: '', TP: '' };
+    }
+
+    function displayScalar(value) {
+      return value === null || value === undefined ? '' : String(value);
+    }
+
+    function outputScalar(value) {
+      const text = String(value ?? '').trim();
+      if (!text) return '';
+      if (/^-?\d+(\.\d+)?$/.test(text)) return Number(text);
+      return text;
+    }
+
+    function rowFromValue(row) {
+      return {
+        Group: displayScalar(row?.Group ?? row?.group),
+        LP: displayScalar(row?.LP ?? row?.lp),
+        TP: displayScalar(row?.TP ?? row?.tp)
+      };
+    }
+
+    function dataFromParameterRows() {
+      return parameterRows.map(row => ({
+        Group: String(row.Group ?? '').trim(),
+        LP: outputScalar(row.LP),
+        TP: outputScalar(row.TP)
+      })).filter(row => row.Group || row.LP !== '' || row.TP !== '');
+    }
+
+    function setEditorData(data) {
+      $('config-data').value = JSON.stringify(data, null, 2);
+      if (Array.isArray(data)) {
+        editorMode = 'rows';
+        parameterRows = data.length ? data.map(rowFromValue) : [emptyParameterRow()];
+      } else {
+        editorMode = 'json';
+        parameterRows = [emptyParameterRow()];
+      }
+      renderParameterEditor();
+    }
+
+    function switchEditorMode(nextMode) {
+      if (nextMode === editorMode) return;
+      if (nextMode === 'json') {
+        $('config-data').value = JSON.stringify(dataFromParameterRows(), null, 2);
+        editorMode = 'json';
+      } else {
+        let data;
+        try {
+          data = JSON.parse($('config-data').value);
+        } catch {
+          return showToast(t('invalidJson'), true);
+        }
+        if (!Array.isArray(data)) return showToast(t('rowsRequireArray'), true);
+        parameterRows = data.length ? data.map(rowFromValue) : [emptyParameterRow()];
+        editorMode = 'rows';
+      }
+      renderParameterEditor();
+      renderCurrent();
+    }
+
+    function renderParameterEditor() {
+      $('rows-mode-button').classList.toggle('active', editorMode === 'rows');
+      $('json-mode-button').classList.toggle('active', editorMode === 'json');
+      $('parameter-editor').classList.toggle('hidden', editorMode !== 'rows');
+      $('raw-json-editor').classList.toggle('hidden', editorMode !== 'json');
+      if (editorMode !== 'rows') return;
+      $('parameter-rows').innerHTML = parameterRows.map((row, index) => `
+        <div class="parameter-row">
+          <input class="parameter-input parameter-group" value="${escapeHtml(row.Group)}" placeholder="${escapeHtml(t('groupName'))}" aria-label="${escapeHtml(t('groupName'))}" oninput="updateParameterRow(${index}, 'Group', this.value)">
+          <input class="parameter-input" value="${escapeHtml(row.LP)}" placeholder="${escapeHtml(t('lpAccount'))}" aria-label="${escapeHtml(t('lpAccount'))}" oninput="updateParameterRow(${index}, 'LP', this.value)">
+          <input class="parameter-input" value="${escapeHtml(row.TP)}" placeholder="${escapeHtml(t('tpValue'))}" aria-label="${escapeHtml(t('tpValue'))}" oninput="updateParameterRow(${index}, 'TP', this.value)">
+          <button class="parameter-delete" type="button" title="${escapeHtml(t('deleteParameterRow'))}" aria-label="${escapeHtml(t('deleteParameterRow'))}" onclick="removeParameterRow(${index})">×</button>
+        </div>`).join('');
+    }
+
+    function updateParameterRow(index, field, value) {
+      if (!parameterRows[index]) return;
+      parameterRows[index][field] = value;
+      renderCurrent();
+    }
+
+    function addParameterRow() {
+      parameterRows.push(emptyParameterRow());
+      renderParameterEditor();
+      renderCurrent();
+    }
+
+    function removeParameterRow(index) {
+      if (parameterRows.length === 1) parameterRows[0] = emptyParameterRow();
+      else parameterRows.splice(index, 1);
+      renderParameterEditor();
+      renderCurrent();
+    }
+
+    function parsedEditorData(showError = false) {
+      if (editorMode === 'rows') return dataFromParameterRows();
+      try {
+        return JSON.parse($('config-data').value);
+      } catch {
+        if (showError) showToast(t('invalidJson'), true);
+        return undefined;
+      }
+    }
+
+    function previewValue() {
+      const data = parsedEditorData(false);
+      return {
+        uuid: current?.uuid || t('generatedAfterSave'),
+        updated_at: current?.updated_at || t('generatedAfterSave'),
+        enabled: Boolean(current?.enabled),
+        data: data === undefined ? t('invalidJson') : data
+      };
+    }
+
+    function renderCurrent() {
+      const state = $('file-state');
+      state.classList.toggle('active', Boolean(current?.enabled));
+      state.textContent = current?.enabled ? t('activeFile') : current ? t('savedFile') : t('newUnsaved');
+      $('activate-button').disabled = !current || current.enabled;
+      $('delete-button').disabled = !current;
+      $('uuid-note').textContent = current?.uuid ? `UUID ${current.uuid}` : t('uuidOnSave');
+      $('json-preview').textContent = JSON.stringify(previewValue(), null, 2);
+      const selected = configs.find(row => row.filename === current?.filename);
+      $('current-file-url').textContent = selected?.public_url || '-';
+    }
+
+    async function saveConfig() {
+      const filename = $('config-name').value.trim();
+      if (!filename) return showToast(t('enterName'), true);
+      const data = parsedEditorData(true);
+      if (data === undefined) return;
+      const button = $('save-button');
+      button.disabled = true;
+      try {
+        const result = await request('/configs', { method: 'POST', body: JSON.stringify({ filename, data }) });
+        current = { filename: result.filename, ...result.content };
+        $('config-name').value = result.filename.replace(/\.json$/i, '');
+        await Promise.all([loadConfigs(false), loadFeedback(false)]);
+        renderCurrent();
+        showToast(t('saved'));
+      } catch (err) {
+        showToast(err.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function activateConfig() {
+      if (!current || !confirm(t('confirmActivate'))) return;
+      try {
+        const result = await request('/configs/' + encodeURIComponent(current.filename) + '/enable', { method: 'PUT', body: '{}' });
+        current = { filename: result.filename, ...result.content };
+        await Promise.all([loadConfigs(false), loadFeedback(false)]);
+        renderCurrent();
+        showToast(t('activated'));
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    async function deleteConfig() {
+      if (!current || !confirm(t('confirmDelete'))) return;
+      try {
+        await request('/configs/' + encodeURIComponent(current.filename), { method: 'DELETE' });
+        newConfig();
+        await Promise.all([loadConfigs(true), loadFeedback(false)]);
+        showToast(t('deleted'));
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function renderFiles() {
+      const list = $('config-list');
+      $('config-count').textContent = String(configs.length);
+      if (!configs.length) {
+        list.innerHTML = `<div class="empty">${escapeHtml(t('noConfigs'))}</div>`;
+        return;
+      }
+      list.innerHTML = configs.map(row => `
+        <button class="file-item ${current?.filename === row.filename ? 'selected' : ''}" type="button" onclick="openConfig('${encodeURIComponent(row.filename)}')">
+          <span class="item-top">
+            <span class="item-name">${escapeHtml(row.filename)}</span>
+            ${row.enabled ? `<span class="active-badge">${escapeHtml(t('activeFile'))}</span>` : ''}
+          </span>
+          <span class="item-meta">UUID ${escapeHtml(shortUuid(row.uuid))} · ${escapeHtml(formatDate(row.updated_at))}</span>
+        </button>`).join('');
+    }
+
+    async function loadFeedback(showError = false) {
+      try {
+        const data = await request('/plugin-feedback?limit=30');
+        feedback = data.feedback || [];
+        renderFeedback();
+        updatePluginStatus();
+      } catch (err) {
+        if (showError) showToast(err.message, true);
+      }
+    }
+
+    function renderFeedback() {
+      const list = $('feedback-list');
+      $('feedback-count').textContent = String(feedback.length);
+      if (!feedback.length) {
+        list.innerHTML = `<div class="empty">${escapeHtml(t('noFeedback'))}</div>`;
+        return;
+      }
+      list.innerHTML = feedback.map(row => {
+        const isError = row.status === 'error' || row.status === 'failed';
+        return `<div class="feedback-item">
+          <div class="item-top">
+            <span class="feedback-status ${isError ? 'error' : 'ok'}">${escapeHtml(row.status)}</span>
+            <span class="feedback-version">${escapeHtml(row.plugin_version ? `v${row.plugin_version}` : 'v-')}</span>
+          </div>
+          <div class="item-meta">UUID ${escapeHtml(shortUuid(row.uuid))} · ${escapeHtml(formatDate(row.received_at))}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function updatePluginStatus() {
+      const dot = $('status-dot');
+      const title = $('status-title');
+      const detail = $('status-detail');
+      dot.className = 'status-dot';
+
+      let statusTitle = t('waiting');
+      let statusDetail = t('waitingDetail');
+      let color = '';
+
+      if (!activeMeta?.uuid) {
+        statusTitle = t('noActive');
+        statusDetail = t('noActiveDetail');
+      } else {
+        const latest = feedback.find(row => row.uuid === activeMeta.uuid);
+        if (!latest) {
+          statusDetail = `${t('waitingDetail')} UUID ${shortUuid(activeMeta.uuid)}`;
+        } else if (latest.status === 'error' || latest.status === 'failed') {
+          statusTitle = t('reportedError');
+          statusDetail = `${latest.status} · ${formatDate(latest.received_at)} · ${latest.plugin_version ? `v${latest.plugin_version}` : 'v-'}`;
+          color = 'red';
+        } else if (Date.now() - new Date(latest.received_at).getTime() > 10 * 60 * 1000) {
+          statusTitle = t('stale');
+          statusDetail = `${latest.status} · ${formatDate(latest.received_at)} · ${latest.plugin_version ? `v${latest.plugin_version}` : 'v-'}`;
+          color = 'red';
+        } else {
+          statusTitle = t('connected');
+          statusDetail = `${latest.status} · ${formatDate(latest.received_at)} · ${latest.plugin_version ? `v${latest.plugin_version}` : 'v-'}`;
+          color = 'green';
+        }
+      }
+
+      if (color) dot.classList.add(color);
+      title.textContent = statusTitle;
+      detail.textContent = statusDetail;
+      $('plugin-status').title = `${statusTitle}: ${statusDetail}`;
+    }
+
+    function shortUuid(value) {
+      if (!value) return '-';
+      return value.length > 13 ? `${value.slice(0, 8)}...${value.slice(-4)}` : value;
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return t('never');
+      return new Intl.DateTimeFormat(language === 'zh' ? 'zh-CN' : 'en-GB', {
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false
+      }).format(date);
+    }
+
+    async function copyValue(id) {
+      const value = $(id).textContent;
+      if (!value || value === '-') return;
+      try {
+        await navigator.clipboard.writeText(value);
+        showToast(t('copied'));
+      } catch {
+        showToast(t('requestFailed'), true);
+      }
+    }
+
+    function openPasswordModal() {
+      $('password-modal').classList.remove('hidden');
+      $('current-password').focus();
+    }
+
+    function closePasswordModal() {
+      $('password-modal').classList.add('hidden');
+      $('password-form').reset();
+    }
+
+    async function updatePassword(event) {
+      event.preventDefault();
+      try {
+        await request('/password', {
+          method: 'PUT',
+          body: JSON.stringify({ current_password: $('current-password').value, new_password: $('new-password').value })
+        });
+        closePasswordModal();
+        showToast(t('passwordUpdated'));
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    }
+
+    function renderUpgradeStatus(data) {
+      const status = $('update-status');
+      status.className = 'update-status';
+      let message = t('updateIdle');
+      if (data?.state === 'queued') {
+        message = `${t('updateQueued')} ${data.target_version ? `v${data.target_version}` : ''}`.trim();
+      } else if (data?.state === 'installing') {
+        message = `${t('updateInstalling')} ${data.target_version ? `v${data.target_version}` : ''}`.trim();
+      } else if (data?.state === 'success') {
+        message = `${t('updateSuccess')} ${data.target_version ? `v${data.target_version}` : ''}`.trim();
+        status.classList.add('success');
+      } else if (data?.state === 'failed') {
+        message = data.message || t('updateFailed');
+        status.classList.add('failed');
+      }
+      status.textContent = message;
+    }
+
+    async function loadUpgradeStatus() {
+      try {
+        const data = await request('/upgrade/status');
+        renderUpgradeStatus(data);
+        if (data.state === 'success') await loadVersion();
+        return data.state;
+      } catch {
+        $('update-status').textContent = t('updateReconnect');
+        return 'reconnecting';
+      }
+    }
+
+    async function pollUpgradeStatus() {
+      clearTimeout(upgradePollTimer);
+      if ($('update-modal').classList.contains('hidden')) return;
+      const state = await loadUpgradeStatus();
+      if (state === 'queued' || state === 'installing' || state === 'reconnecting') {
+        upgradePollTimer = setTimeout(pollUpgradeStatus, 2500);
+      }
+    }
+
+    function openUpdateModal() {
+      $('update-modal').classList.remove('hidden');
+      $('current-version').textContent = `v${currentVersion}`;
+      renderUpgradeStatus({ state: 'idle' });
+      loadUpgradeStatus();
+    }
+
+    function closeUpdateModal() {
+      clearTimeout(upgradePollTimer);
+      upgradePollTimer = null;
+      $('update-modal').classList.add('hidden');
+      $('update-form').reset();
+    }
+
+    async function uploadUpdate(event) {
+      event.preventDefault();
+      const file = $('update-file').files[0];
+      if (!file || !file.name.toLowerCase().endsWith('.zip')) return showToast(t('selectZip'), true);
+      if (!confirm(t('confirmUpdate'))) return;
+      const button = $('update-button');
+      button.disabled = true;
+      try {
+        const data = await request('/upgrade', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/zip' },
+          body: file
+        });
+        renderUpgradeStatus(data);
+        upgradePollTimer = setTimeout(pollUpgradeStatus, 2500);
+      } catch (err) {
+        showToast(err.message, true);
+        upgradePollTimer = setTimeout(pollUpgradeStatus, 2500);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    $('login-form').addEventListener('submit', login);
+    $('password-form').addEventListener('submit', updatePassword);
+    $('update-form').addEventListener('submit', uploadUpdate);
+    $('config-data').addEventListener('input', renderCurrent);
+    $('config-name').addEventListener('input', renderCurrent);
+    restoreSession();
+  </script>
+</body>
+</html>
