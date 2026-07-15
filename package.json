@@ -1,0 +1,21 @@
+{
+  "name": "dividend-uploader",
+  "version": "0.2.4",
+  "private": true,
+  "description": "MT4/MT5 dividend and overnight interest remote configuration portal",
+  "type": "module",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning website/src/web/api/server.mjs",
+    "dev": "node --disable-warning=ExperimentalWarning website/src/web/api/server.mjs",
+    "dev:py": "python3 website/optional/tools/project-tools/dev/load_test_environment.py",
+    "test:env": "python3 website/optional/tools/project-tools/dev/load_test_environment.py",
+    "test:env:prepare": "python3 website/optional/tools/project-tools/dev/load_test_environment.py --prepare-only",
+    "test": "node --disable-warning=ExperimentalWarning --test website/optional/tests/unit/*.test.mjs website/optional/tests/integration/*.test.mjs",
+    "docs": "python3 -m http.server 8080",
+    "docs:all": "python3 website/optional/tools/project-tools/docs/build_all_docs_html.py",
+    "package:simple": "python3 website/optional/tools/project-tools/package/create_run_package.py",
+    "package:portal": "python3 website/optional/tools/project-tools/package/create_portal_packages.py",
+    "package:github": "python3 website/optional/tools/project-tools/package/create_github_website_package.py",
+    "package:all": "npm run docs:all && npm run package:portal && npm run package:simple && npm run package:github"
+  }
+}

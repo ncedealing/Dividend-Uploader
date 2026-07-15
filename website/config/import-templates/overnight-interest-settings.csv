@@ -1,0 +1,4 @@
+mtSymbolMask,longInterestValue,shortInterestValue,groupMask,currency,remark
+EURUSD,-6.50,2.10,,USD,Update EURUSD overnight interest values
+XAUUSD,-12.00,4.50,real\VIP*,USD,VIP metals financing values
+AAPL.m,-2.90,1.25,,USD,US stock CFD overnight interest values

@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dividend Uploader</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-main">
+        <div class="brand">
+          <span class="brand-mark">DU</span>
+          <div>
+            <h1 id="pageTitle">CSV Data</h1>
+            <p id="pageSubtitle">Import, edit, export, then apply rows to the published JSON.</p>
+          </div>
+        </div>
+
+        <nav class="main-nav" aria-label="Workspace tabs">
+          <button class="tab-button active" data-tab="csvUpload" type="button">CSV Data</button>
+          <button class="tab-button" data-tab="configuration" type="button">Configuration</button>
+          <button class="tab-button" data-tab="pluginPortal" type="button">Plugin Sync</button>
+          <button class="tab-button" data-tab="pluginStatus" type="button">Status</button>
+          <button class="tab-button" data-tab="dryrun" type="button">Preview</button>
+          <button class="tab-button" data-tab="history" type="button">History</button>
+        </nav>
+
+        <div class="quick-status connection-only" aria-label="Plugin connection status">
+          <article class="link-status-card" id="linkStatusCard">
+            <span>Connection</span>
+            <strong class="link-status-line"><i id="headerPluginDot" class="dot neutral"></i><b id="pluginQuickStatus">Waiting</b></strong>
+            <small id="pluginQuickDetail">No heartbeat</small>
+          </article>
+        </div>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section id="csvUpload" class="panel focus-panel tab-panel">
+        <div class="panel-head">
+          <div>
+            <h2>CSV Data</h2>
+            <p class="muted-text">Daily CSV upload, table editing, import and export.</p>
+          </div>
+          <div class="actions">
+            <button id="loadConfig" type="button">Refresh</button>
+            <button id="addCsvRow" type="button">Add Row</button>
+            <button id="applyCsvToJson" class="primary" type="button">Apply To JSON</button>
+            <button id="exportCsv" type="button">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="compact-form csv-form">
+          <label>
+            Operator
+            <input id="operator" value="web-operator" aria-label="Operator" />
+          </label>
+          <label>
+            CSV type
+            <select id="csvType">
+              <option value="overnightInterest">Overnight interest values</option>
+              <option value="dividend">Dividend records</option>
+            </select>
+          </label>
+          <label>
+            CSV file
+            <input id="csvFile" type="file" accept=".csv,text/csv" />
+          </label>
+        </div>
+
+        <div class="table-toolbar">
+          <span id="csvPreview" class="muted-text">Rows: 0</span>
+          <details class="raw-csv-details">
+            <summary>Raw CSV</summary>
+            <div class="raw-csv-grid">
+              <textarea id="csvText" rows="7" spellcheck="false"></textarea>
+              <button id="loadRawCsv" type="button">Load Raw CSV</button>
+            </div>
+          </details>
+        </div>
+
+        <div class="table-wrap edit-table-wrap">
+          <table class="editable-table">
+            <thead id="csvTableHead"></thead>
+            <tbody id="csvRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="configuration" class="panel tab-panel" hidden>
+        <div class="panel-head">
+          <div>
+            <h2>Configuration</h2>
+            <p class="muted-text">Low-change settings are grouped by category, with sub-tabs inside each category.</p>
+          </div>
+          <div class="actions">
+            <button id="exportProductsCsv" type="button">Export Products</button>
+            <button id="addProduct" class="primary" type="button">Add Product</button>
+          </div>
+        </div>
+
+        <div class="configuration-layout">
+          <aside class="config-sidebar" aria-label="Configuration categories">
+            <button class="config-menu-button active" data-config-section="configProducts" type="button">Products</button>
+            <button class="config-menu-button" data-config-section="configEnvironment" type="button">Environment</button>
+            <button class="config-menu-button" data-config-section="configExecution" type="button">Execution</button>
+            <button class="config-menu-button" data-config-section="configRemoteSync" type="button">Remote Sync</button>
+          </aside>
+
+          <div class="config-main">
+            <section id="configProducts" class="config-section">
+              <div class="config-subtabs" aria-label="Product tabs">
+                <button class="config-tab-button active" data-config-tab="configProductsList" type="button">Product List</button>
+                <button class="config-tab-button" data-config-tab="configProductsImport" type="button">Import / Export</button>
+              </div>
+
+              <div id="configProductsList" class="config-tab-panel">
+                <input id="productMasks" type="hidden" />
+                <div class="table-wrap edit-table-wrap">
+                  <table class="editable-table products-table">
+                    <thead>
+                      <tr>
+                        <th>On</th>
+                        <th>Product ID</th>
+                        <th>Name</th>
+                        <th>Platform</th>
+                        <th>MT symbol mask</th>
+                        <th>Currency</th>
+                        <th>Contract</th>
+                        <th>Ratio</th>
+                        <th>Group mask</th>
+                        <th>Remark</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="productRows"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="configProductsImport" class="config-tab-panel" hidden>
+                <div class="settings-grid two-col">
+                  <label>
+                    Product CSV file
+                    <input id="productCsvFile" type="file" accept=".csv,text/csv" />
+                  </label>
+                  <label>
+                    Current product masks
+                    <input value="Generated from enabled products" readonly />
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section id="configEnvironment" class="config-section" hidden>
+              <div class="config-subtabs" aria-label="Environment tabs">
+                <button class="config-tab-button active" data-config-tab="configTarget" type="button">Target</button>
+                <button class="config-tab-button" data-config-tab="configTimeZone" type="button">Time Zone</button>
+              </div>
+
+              <div id="configTarget" class="config-tab-panel">
+                <div class="settings-grid three-col">
+                  <label>
+                    Platform
+                    <select id="portalPlatform">
+                      <option value="both">both</option>
+                      <option value="mt4">mt4</option>
+                      <option value="mt5">mt5</option>
+                    </select>
+                  </label>
+                  <label>
+                    Server
+                    <input id="portalServerId" value="select-on-page" />
+                  </label>
+                  <label>
+                    Effective from
+                    <input id="portalEffectiveFrom" type="datetime-local" />
+                  </label>
+                </div>
+              </div>
+
+              <div id="configTimeZone" class="config-tab-panel" hidden>
+                <div class="settings-grid two-col">
+                  <label>
+                    Website business timezone
+                    <select id="portalBusinessTimezone">
+                      <option value="Asia/Shanghai">Asia/Shanghai</option>
+                      <option value="UTC">UTC</option>
+                      <option value="Europe/London">Europe/London</option>
+                      <option value="Europe/Limassol">Europe/Limassol</option>
+                      <option value="America/New_York">America/New_York</option>
+                      <option value="Asia/Tokyo">Asia/Tokyo</option>
+                      <option value="Asia/Dubai">Asia/Dubai</option>
+                    </select>
+                  </label>
+                  <label>
+                    Plugin timezone source
+                    <select id="portalServerTimezone">
+                      <option value="auto-mt-server">Auto: MT4/MT5 server timezone</option>
+                      <option value="UTC">UTC</option>
+                      <option value="Asia/Shanghai">Asia/Shanghai</option>
+                      <option value="Europe/London">Europe/London</option>
+                      <option value="Europe/Limassol">Europe/Limassol</option>
+                      <option value="America/New_York">America/New_York</option>
+                      <option value="Asia/Tokyo">Asia/Tokyo</option>
+                      <option value="Asia/Dubai">Asia/Dubai</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section id="configExecution" class="config-section" hidden>
+              <div class="config-subtabs" aria-label="Execution tabs">
+                <button class="config-tab-button active" data-config-tab="configReview" type="button">Review</button>
+                <button class="config-tab-button" data-config-tab="configThrottle" type="button">Throttle</button>
+              </div>
+
+              <div id="configReview" class="config-tab-panel">
+                <div class="settings-grid two-col">
+                  <label>
+                    Global ratio
+                    <input id="globalRatio" type="number" step="0.01" />
+                  </label>
+                  <label>
+                    Review mode
+                    <select id="reviewMode">
+                      <option value="threshold">threshold</option>
+                      <option value="always">always</option>
+                      <option value="never">never</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div id="configThrottle" class="config-tab-panel" hidden>
+                <div class="settings-grid two-col">
+                  <label>
+                    Interval seconds
+                    <input id="intervalSeconds" type="number" step="0.01" min="0.01" max="10" />
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section id="configRemoteSync" class="config-section" hidden>
+              <div class="config-subtabs" aria-label="Remote sync tabs">
+                <button class="config-tab-button active" data-config-tab="configRemoteUrl" type="button">URL</button>
+                <button class="config-tab-button" data-config-tab="configRemoteFile" type="button">File</button>
+              </div>
+
+              <div id="configRemoteUrl" class="config-tab-panel">
+                <div class="settings-grid two-col">
+                  <label>
+                    Plugin sync base URL
+                    <input id="portalBaseUrl" value="https://test.appcdn002.com" placeholder="https://example.com" />
+                  </label>
+                </div>
+              </div>
+
+              <div id="configRemoteFile" class="config-tab-panel" hidden>
+                <div class="settings-grid two-col">
+                  <label>
+                    Config filename
+                    <input id="portalFilename" value="dividend-uploader-remote.json" />
+                  </label>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section id="pluginPortal" class="panel portal-grid tab-panel" hidden>
+        <div class="portal-main">
+          <div class="panel-head">
+            <div>
+              <h2>Plugin Sync</h2>
+              <p class="muted-text">Save the current CSV and configuration as the active plugin JSON.</p>
+            </div>
+            <div class="actions">
+              <button id="portalLoad" type="button">Load Active</button>
+              <button id="portalSave" class="primary" type="button">Save Config</button>
+              <button id="portalEnable" type="button">Enable</button>
+            </div>
+          </div>
+
+          <div id="portalLogin" class="login-row">
+            <input id="portalUsername" autocomplete="username" placeholder="Admin username" />
+            <input id="portalPassword" type="password" autocomplete="current-password" placeholder="Admin password" />
+            <button id="portalLoginButton" class="primary" type="button">Login</button>
+            <span id="portalLoginStatus" class="muted-text">Login required for management actions</span>
+          </div>
+
+          <div id="portalStatusRow" class="connection-row">
+            <span id="portalStatusDot" class="dot neutral"></span>
+            <strong id="portalStatusLabel">No active configuration</strong>
+            <span id="portalStatusDetail">Save a configuration before connecting plugins.</span>
+          </div>
+
+          <div class="portal-content">
+            <label class="field json-field">
+              <span>Published JSON preview</span>
+              <textarea id="portalJson" rows="18" spellcheck="false"></textarea>
+            </label>
+
+            <aside class="portal-side">
+              <details class="integration-details" open>
+                <summary>Integration</summary>
+                <dl>
+                  <dt>UUID check</dt>
+                  <dd><code id="portalMetaUrl"></code></dd>
+                  <dt>Active JSON</dt>
+                  <dd><code id="portalActiveUrl"></code></dd>
+                  <dt>Feedback</dt>
+                  <dd><code id="portalFeedbackUrl"></code></dd>
+                  <dt>UUID</dt>
+                  <dd><code id="portalCurrentUuid"></code></dd>
+                </dl>
+              </details>
+
+              <details class="side-details">
+                <summary>Config Files</summary>
+                <div class="side-actions">
+                  <button id="portalRefreshFiles" type="button">Refresh Files</button>
+                </div>
+                <div id="portalFiles" class="file-list"></div>
+              </details>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="pluginStatus" class="panel tab-panel" hidden>
+        <div class="panel-head">
+          <div>
+            <h2>Plugin Status</h2>
+            <p class="muted-text">Heartbeat state is calculated only from the current active UUID.</p>
+          </div>
+          <div class="actions">
+            <button id="portalRefreshFeedback" class="primary" type="button">Refresh Feedback</button>
+          </div>
+        </div>
+
+        <div class="status-layout">
+          <div id="portalStatusRowMirror" class="connection-row status-large">
+            <span id="portalStatusDotMirror" class="dot neutral"></span>
+            <strong id="portalStatusLabelMirror">No active configuration</strong>
+            <span id="portalStatusDetailMirror">Save a configuration before connecting plugins.</span>
+          </div>
+          <div id="portalFeedback" class="feedback-list"></div>
+        </div>
+      </section>
+
+      <section id="dryrun" class="panel tab-panel" hidden>
+        <div class="panel-head">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button id="runDryRun" class="primary" type="button">Dry Run</button>
+            <button id="previewEmail" type="button">Audit Email</button>
+            <button id="mockApply" type="button">Mock Apply</button>
+          </div>
+        </div>
+        <textarea id="positionsJson" rows="5" spellcheck="false"></textarea>
+        <div id="dryRunSummary" class="summary-line"></div>
+        <div class="table-wrap compact-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Login</th>
+                <th>Ticket</th>
+                <th>Symbol</th>
+                <th>Side</th>
+                <th>Lots</th>
+                <th>Matched Mask</th>
+                <th>Mapping</th>
+                <th>Per Lot</th>
+                <th>Tax</th>
+                <th>Final</th>
+                <th>Warnings</th>
+              </tr>
+            </thead>
+            <tbody id="planRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="history" class="panel history-grid tab-panel" hidden>
+        <div>
+          <div class="panel-head">
+            <h2>Imported CSV Records</h2>
+          </div>
+          <div class="table-wrap compact">
+            <table>
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Ex-date</th>
+                  <th>Unit</th>
+                  <th>Amount</th>
+                  <th>Currency</th>
+                </tr>
+              </thead>
+              <tbody id="dividendRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel-head">
+            <h2>Batch History</h2>
+            <button id="loadBatches" type="button">Refresh</button>
+          </div>
+          <div class="table-wrap compact">
+            <table>
+              <thead>
+                <tr>
+                  <th>Batch</th>
+                  <th>Status</th>
+                  <th>Orders</th>
+                  <th>Total</th>
+                  <th>Operator</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="batchRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" role="status"></div>
+    <script type="module" src="/app.mjs"></script>
+  </body>
+</html>

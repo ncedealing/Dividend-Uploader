@@ -1,0 +1,62 @@
+# Dividend Uploader GitHub Website Package Manifest
+
+Version: `0.2.4`
+Generated: `2026-07-15T23:50:05`
+
+## Included Files
+
+- `.editorconfig`
+- `.gitignore`
+- `VERSION`
+- `index.html`
+- `package.json`
+- `website/.env.example`
+- `website/config/default-dividend-config.template.json`
+- `website/config/import-templates/overnight-interest-settings.csv`
+- `website/install/install-linux.sh`
+- `website/optional/local-test/WINDOWS_TODAY_TEST.html`
+- `website/optional/local-test/check-runtime.bat`
+- `website/optional/local-test/run_local.py`
+- `website/optional/local-test/start-web.bat`
+- `website/optional/local-test/start-web.command`
+- `website/optional/tests/integration/pluginPortal.test.mjs`
+- `website/optional/tests/integration/webApi.test.mjs`
+- `website/optional/tests/unit/accountScope.test.mjs`
+- `website/optional/tests/unit/calculationAndDryRun.test.mjs`
+- `website/optional/tests/unit/mappingMatcher.test.mjs`
+- `website/optional/tests/unit/patterns.test.mjs`
+- `website/optional/tests/unit/storage.test.mjs`
+- `website/optional/tools/project-tools/dev/load_test_environment.py`
+- `website/optional/tools/project-tools/docs/build_all_docs_html.py`
+- `website/optional/tools/project-tools/package/create_github_website_package.py`
+- `website/optional/tools/project-tools/package/create_portal_packages.py`
+- `website/optional/tools/project-tools/package/create_run_package.py`
+- `website/src/adapters/finnhub/FinnhubDividendClient.mjs`
+- `website/src/adapters/mail/AuditMailComposer.mjs`
+- `website/src/adapters/mock/MockExecutionAdapter.mjs`
+- `website/src/adapters/storage/createLedger.mjs`
+- `website/src/core/calculation/dividendCalculator.mjs`
+- `website/src/core/domain/defaultConfig.mjs`
+- `website/src/core/dry-run/dryRunEngine.mjs`
+- `website/src/core/execution/applyEngine.mjs`
+- `website/src/core/idempotency/idempotencyKey.mjs`
+- `website/src/core/review/reviewPolicy.mjs`
+- `website/src/core/rules/accountScope.mjs`
+- `website/src/core/rules/mappingMatcher.mjs`
+- `website/src/core/rules/patterns.mjs`
+- `website/src/jobs/sync/finnhubSyncJob.mjs`
+- `website/src/storage/migrations/001_initial_schema.sql`
+- `website/src/storage/repositories/SqliteLedger.mjs`
+- `website/src/web/api/pluginPortal.mjs`
+- `website/src/web/api/server.mjs`
+- `website/src/web/ui/app.mjs`
+- `website/src/web/ui/index.html`
+- `website/src/web/ui/styles.css`
+
+## Excluded From This GitHub Package
+
+- `packages/` generated ZIP files
+- `website/runtime/` data files
+- Visual Studio DLL plugin projects
+- official SDK file sets
+- local secrets such as `.env`

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dividend Uploader Windows 快速测试</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fa;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #607085;
+      --line: #d8dee8;
+      --accent: #1769aa;
+      --ok: #147a46;
+      --warn: #a15c00;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+      line-height: 1.65;
+    }
+    main {
+      width: min(980px, calc(100% - 32px));
+      margin: 32px auto 56px;
+    }
+    header, section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px 28px;
+      margin-top: 16px;
+    }
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    h2 { margin: 0 0 12px; font-size: 21px; }
+    p { margin: 8px 0; }
+    ol, ul { padding-left: 22px; }
+    li { margin: 7px 0; }
+    code {
+      background: #eef3f8;
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-family: Consolas, "Courier New", monospace;
+    }
+    pre {
+      margin: 12px 0;
+      padding: 14px 16px;
+      overflow-x: auto;
+      color: #eef4ff;
+      background: #111827;
+      border-radius: 8px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .status {
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      font-size: 14px;
+    }
+    .muted { color: var(--muted); }
+    .ok { color: var(--ok); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+    .callout {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--accent);
+      background: #eef6ff;
+      border-radius: 6px;
+    }
+    @media (max-width: 760px) {
+      main { width: min(100% - 24px, 980px); margin-top: 16px; }
+      header, section { padding: 18px; }
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Dividend Uploader Windows 快速测试</h1>
+      <p class="muted">当前主线：网站后台管理配置，MT4/MT5 插件远程同步 JSON，并更新系统隔夜利息 long/short 数值。</p>
+      <div class="grid">
+        <div class="status"><strong>本地页面</strong><br>运行 <code>start-web.bat</code> 自动加载测试环境并打开页面。</div>
+        <div class="status"><strong>插件工程</strong><br>MT4/MT5 各有独立 Visual Studio solution。</div>
+        <div class="status"><strong>安装包</strong><br>网站安装包、升级包和插件包统一输出到 <code>packages</code>。</div>
+      </div>
+    </header>
+
+    <section>
+      <h2>1. 解压或复制到 Windows</h2>
+      <p>建议使用简单路径：</p>
+      <pre>D:\Plugin\DividendUploader</pre>
+      <p>目录里应能看到：</p>
+      <ul>
+        <li><code>run_local.py</code></li>
+        <li><code>start-web.bat</code></li>
+        <li><code>plugins\mt4\DividendUploaderMT4RemoteConfigPlugin.sln</code></li>
+        <li><code>plugins\mt5\DividendUploaderMT5RemoteConfigPlugin.sln</code></li>
+        <li><code>sdk\mt4\</code></li>
+        <li><code>sdk\mt5\</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. 启动本地页面</h2>
+      <ol>
+        <li>双击 <code>check-runtime.bat</code>，确认 Python 和 Node.js 能显示版本。</li>
+        <li>双击 <code>start-web.bat</code>。</li>
+        <li>脚本会自动加载测试数据并打开浏览器。</li>
+      </ol>
+      <p>页面地址：</p>
+      <pre>http://127.0.0.1:4173</pre>
+      <div class="callout">不要从 Python IDLE 里运行 <code>run_local.py</code>。如果有错误，IDLE 可能看起来像“没反应”。</div>
+    </section>
+
+    <section>
+      <h2>3. 生成交付包</h2>
+      <p>在项目根目录打开 PowerShell 或命令提示符：</p>
+      <pre>npm run package:all</pre>
+      <p>输出目录：</p>
+      <pre>packages\plugin-config-portal
+packages\simple-run</pre>
+      <p>需要交付的网站包和插件包都在这里。</p>
+    </section>
+
+    <section>
+      <h2>4. 编译 MT4 插件 DLL</h2>
+      <ol>
+        <li>打开 <code>plugins\mt4\DividendUploaderMT4RemoteConfigPlugin.sln</code>。</li>
+        <li>通常先选择 <code>Release | Win32</code>。</li>
+        <li>确认官方 MT4 Server Plugin SDK 已放到 <code>sdk\mt4\</code>，或在项目属性里修改 <code>MT4_SDK_DIR</code>。</li>
+        <li>Build 后到 <code>packages\plugin-build\</code> 取 DLL。</li>
+      </ol>
+      <p class="warn">当前 <code>sdk\mt4\MT4_API</code> 主要是文档，正式可加载插件需要补官方 MT4 Server Plugin SDK 的头文件和库文件。</p>
+    </section>
+
+    <section>
+      <h2>5. 编译 MT5 插件 DLL</h2>
+      <ol>
+        <li>打开 <code>plugins\mt5\DividendUploaderMT5RemoteConfigPlugin.sln</code>。</li>
+        <li>选择 <code>Release | x64</code>。</li>
+        <li>默认 SDK 路径是 <code>sdk\mt5\MetaTrader5SDK</code>。</li>
+        <li>Build 后到 <code>packages\plugin-build\</code> 取 DLL。</li>
+      </ol>
+      <p>真实隔夜利息更新实现优先参考：</p>
+      <pre>sdk\mt5\MetaTrader5SDK\Examples\Server\InterestRates
+sdk\mt5\MetaTrader5SDK\Examples\Server\SwapsCopier</pre>
+    </section>
+
+    <section>
+      <h2>6. 网站安装和插件同步</h2>
+      <p>网站生产域名可以在后台页面配置，不限定测试域名。默认示例：</p>
+      <pre>https://test.appcdn002.com</pre>
+      <p>插件公开读取地址：</p>
+      <pre>https://test.appcdn002.com/admin-api/dividend-uploader-public/active-meta.json
+https://test.appcdn002.com/admin-api/dividend-uploader-public/active.json
+https://test.appcdn002.com/admin-api/dividend-uploader-feedback</pre>
+      <p>插件生效时间按页面选择的业务时区录入，发布给插件时同时带 UTC 时间。</p>
+      <p>完整部署步骤见：</p>
+      <pre>index.html</pre>
+    </section>
+
+    <section>
+      <h2>7. 关键原则</h2>
+      <ul>
+        <li class="ok">隔夜利息只更新系统 long/short interest 数值。</li>
+        <li>不通过客户 Balance/Deal 实现隔夜利息。</li>
+        <li>平台、服务器、生效时间在页面选择，不写入 CSV。</li>
+        <li>计息模式和三倍日只读展示，不随 CSV 修改。</li>
+        <li>升级网站不能覆盖已有配置、UUID、管理员账号和插件反馈记录。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>8. 自动安装依赖</h2>
+      <p>如果运行 <code>run_local.py</code> 时检测不到 Node.js，脚本会自动尝试安装 Node.js 24+。</p>
+      <ul>
+        <li>Windows 优先使用 <code>winget</code> 自动安装。</li>
+        <li>如果没有 <code>winget</code>，会尝试使用 <code>choco</code>。</li>
+        <li>安装完成后脚本会自动查找常见 Node.js 安装目录，并继续启动页面。</li>
+        <li>如果不想自动安装，可以运行 <code>py run_local.py --no-auto-install</code>。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

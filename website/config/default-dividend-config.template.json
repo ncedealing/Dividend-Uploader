@@ -1,0 +1,207 @@
+{
+  "version": 1,
+  "finnhub": {
+    "enabled": false,
+    "apiKeySecretName": "FINNHUB_API_KEY",
+    "syncSchedule": {
+      "enabled": false,
+      "cron": "0 2 * * *",
+      "timezone": "Asia/Shanghai",
+      "lookbackDays": 7,
+      "lookaheadDays": 30
+    },
+    "retry": {
+      "maxRetries": 3,
+      "backoffSeconds": 5
+    }
+  },
+  "operationTypes": {
+    "dividend": {
+      "enabled": true,
+      "label": "Stock dividend"
+    },
+    "overnightInterest": {
+      "enabled": true,
+      "label": "Overnight interest"
+    }
+  },
+  "remotePluginSync": {
+    "baseUrl": "https://test.appcdn002.com",
+    "allowUrlOverride": true,
+    "publicBasePath": "/admin-api/dividend-uploader-public",
+    "feedbackPath": "/admin-api/dividend-uploader-feedback",
+    "metadataFile": "active-meta.json",
+    "fullConfigFile": "active.json",
+    "metadataIntervalSeconds": 300,
+    "heartbeatIntervalSeconds": 300
+  },
+  "timeSync": {
+    "businessTimezone": "Asia/Shanghai",
+    "serverTimezone": "auto-mt-server",
+    "serverTimezoneMode": "auto",
+    "pluginTimezoneSource": "mt-server",
+    "effectiveTimeMode": "business-timezone",
+    "storePublishedTimestampsAs": "utc",
+    "requirePluginUtcClock": true,
+    "maxClockDriftSeconds": 120
+  },
+  "dividendProductMasks": "Stocks*, US.*, AAPL.m, TSLA.m, Indices*, Index*",
+  "overnightInterest": {
+    "enabled": true,
+    "productMasks": "FX*, Forex*, Metals*, XAU*, XAG*, Indices*, Index*, Stocks*, US.*",
+    "updateMode": "systemSetting",
+    "pageContextRequired": [
+      "platform",
+      "serverId",
+      "effectiveFrom"
+    ],
+    "pageContextOptional": [
+      "sourceBatchNo"
+    ],
+    "pageContextGenerated": [
+      "uploadBatchId",
+      "sourceBatchNo"
+    ],
+    "readOnlyContextFields": [
+      "interestMode",
+      "tripleDay"
+    ],
+    "csv": {
+      "encoding": "utf-8-sig",
+      "delimiter": "auto",
+      "maxRows": 50000,
+      "maxFileSizeMb": 20
+    },
+    "requiredColumns": [
+      "mtSymbolMask",
+      "longInterestValue",
+      "shortInterestValue"
+    ],
+    "optionalColumns": [
+      "groupMask",
+      "currency",
+      "remark"
+    ],
+    "validation": {
+      "requireEffectiveFrom": true,
+      "allowNegativeValue": true,
+      "allowZeroValue": true,
+      "requireExactSymbolWhenMaskMatchesMultiple": false,
+      "allowUnsupportedOptionalFields": false,
+      "allowNoopUpdates": false
+    },
+    "duplicateHandling": {
+      "sameFileDuplicate": "block",
+      "existingSuccessfulUpdateKey": "block",
+      "sameTargetDifferentValue": "block"
+    },
+    "applySafety": {
+      "allowRealInterestUpdate": false,
+      "requireOldValueSnapshot": true,
+      "requireSecondConfirmation": true,
+      "allowRollbackToSnapshot": true
+    }
+  },
+  "globalCalculation": {
+    "globalDividendRatio": 1,
+    "defaultDividendUnit": "perShare",
+    "defaultCurrency": "USD",
+    "defaultLongMultiplier": 1,
+    "defaultShortMultiplier": -1,
+    "defaultTaxRate": 0,
+    "minimumAbsAmount": 0.01,
+    "roundingDigits": 2
+  },
+  "accountScope": {
+    "enabled": true,
+    "groupMasks": "*",
+    "loginMasks": "*"
+  },
+  "mappings": [
+    {
+      "id": "map-aapl-default",
+      "enabled": true,
+      "platform": "both",
+      "mtSymbolMask": "AAPL*",
+      "productSymbol": "AAPL",
+      "displaySymbol": "AAPL",
+      "finnhubSymbol": "AAPL",
+      "contractSize": 100,
+      "dividendUnit": "perShare",
+      "currency": "USD",
+      "dividendRatio": 1,
+      "longRatio": 1,
+      "shortRatio": 1,
+      "longMultiplier": 1,
+      "shortMultiplier": -1,
+      "taxRate": 0,
+      "priority": 10,
+      "accountScope": {
+        "groupMasks": "!GroupA,*",
+        "loginMasks": "*"
+      },
+      "remark": "Apple stock CFD"
+    }
+  ],
+  "reviewPolicy": {
+    "mode": "threshold",
+    "notifyBeforeApply": true,
+    "notifyAfterApply": true,
+    "thresholds": {
+      "totalAbsAmount": 1000,
+      "singleAccountAbsAmount": 300,
+      "singleOrderAbsAmount": 100,
+      "orderCount": 50,
+      "accountCount": 20,
+      "productCount": 10,
+      "ratioGreaterThan": 1,
+      "hasWarnings": true,
+      "hasMissingMapping": true,
+      "hasCurrencyMismatch": true,
+      "hasDuplicateIdempotencyKey": true
+    },
+    "autoApplyDelayMinutes": 0
+  },
+  "auditEmail": {
+    "enabled": true,
+    "recipients": [
+      "audit@example.com"
+    ],
+    "includeCsvAttachment": true,
+    "includePreviewLink": true
+  },
+  "applyThrottle": {
+    "intervalSeconds": 0.2,
+    "maxRetries": 3,
+    "retryBackoffSeconds": 2,
+    "continueOnError": true,
+    "allowPauseResume": true
+  },
+  "platforms": {
+    "mt5": {
+      "enabled": true,
+      "allowRealApply": false
+    },
+    "mt4": {
+      "enabled": true,
+      "allowRealApply": false
+    }
+  },
+  "history": {
+    "retentionDays": 365,
+    "csvExportEnabled": true,
+    "storeRawCsvPayload": true,
+    "storeRawFinnhubPayload": false,
+    "storeConfigSnapshot": true
+  },
+  "importExport": {
+    "allowedModes": [
+      "replace",
+      "merge",
+      "validateOnly"
+    ],
+    "maskSecretsOnExport": true,
+    "allowFullSecretExport": false,
+    "requireSecondConfirmationForFullSecretExport": true
+  }
+}

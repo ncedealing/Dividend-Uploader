@@ -1,0 +1,80 @@
+# Dividend Uploader GitHub Website Install
+
+Version: 0.2.4
+
+This package is prepared for uploading the website source to GitHub and then
+installing it on a Linux server with `git clone`.
+
+It intentionally excludes runtime data, generated packages, Visual Studio DLL
+projects, and official SDK file sets. Build DLL plugin projects separately on
+Windows.
+
+## Upload To GitHub
+
+1. Create an empty GitHub repository.
+2. Unzip this package locally.
+3. Upload or commit the unzipped folder contents to that repository.
+4. Keep `.env`, `website/runtime/data/`, `website/runtime/logs/`, and `website/runtime/portal-data/`
+   out of GitHub.
+
+## Install On Linux Server
+
+```bash
+sudo mkdir -p /opt/dividend-uploader /opt/dividend-uploader-data
+sudo chown -R $USER:$USER /opt/dividend-uploader /opt/dividend-uploader-data
+git clone https://github.com/<your-org>/<your-repo>.git /opt/dividend-uploader
+cd /opt/dividend-uploader
+sudo bash website/install/install-linux.sh
+```
+
+Create production environment variables:
+
+```text
+DIVIDEND_UPLOADER_PORTAL_DATA_DIR=/opt/dividend-uploader-data/portal-data
+DIVIDEND_UPLOADER_DB=/opt/dividend-uploader-data/runtime/dividend-uploader.db
+DIVIDEND_UPLOADER_ADMIN_USER=<first-admin>
+DIVIDEND_UPLOADER_ADMIN_PASSWORD=<temporary-password>
+DIVIDEND_UPLOADER_JWT_SECRET=<at-least-32-random-bytes>
+DIVIDEND_UPLOADER_HOST=127.0.0.1
+DIVIDEND_UPLOADER_PUBLIC_BASE_URL=https://test.appcdn002.com
+PORT=4173
+```
+
+Start:
+
+```bash
+npm start
+```
+
+Public plugin URLs:
+
+```text
+https://test.appcdn002.com/admin-api/dividend-uploader-public/active-meta.json
+https://test.appcdn002.com/admin-api/dividend-uploader-public/active.json
+https://test.appcdn002.com/admin-api/dividend-uploader-feedback
+```
+
+The base URL above is only the default. Change it in the admin page field
+`Configuration / Remote Sync / Plugin sync base URL`, or set
+`DIVIDEND_UPLOADER_PUBLIC_BASE_URL` before the first configuration is created.
+
+## Admin Page Flow
+
+1. Use `CSV Data` for daily CSV import, export, and in-page row editing.
+2. Use `Configuration / Products` for the low-change product list.
+3. Use `Configuration / Environment / Target` for platform, server, and effective time.
+4. Use `Configuration / Environment / Time Zone` for the website business timezone
+   and plugin timezone source. The default plugin source is the MT4/MT5 server timezone.
+5. Use `Configuration / Remote Sync` for the plugin JSON base URL and filename.
+6. Click `Apply To JSON`, then save and publish from `Plugin Sync`.
+
+## Upgrade From GitHub
+
+```bash
+cd /opt/dividend-uploader
+git pull
+sudo systemctl restart dividend-uploader.service
+```
+
+The data directory `/opt/dividend-uploader-data` must remain outside the GitHub
+repository and must not be overwritten during upgrade.
